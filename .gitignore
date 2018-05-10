@@ -4,9 +4,11 @@ __pycache__/
 *$py.class
 
 # Models
+.models
 models/
 
 # PyCharm project
+.idea
 .idea/
 
 # Distribution / packaging
