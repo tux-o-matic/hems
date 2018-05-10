@@ -3,8 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
+# Models
+models/
+
+# PyCharm project
+.idea/
 
 # Distribution / packaging
 .Python
