@@ -7,7 +7,7 @@
 ```shell
 bcm2835-v4l2
 ```
-To reduce noises (glare/reflection) from the Pi's LED, run as root the following commands to turn off the 'Power' and 'Activity' lights respectively :
+To reduce noises (glare/reflection) from the Pi's LED, run as root the following commands to turn off the 'Power' and 'Activity' lights respectively. The Pi Zero only has a led0 :
 ```shell
 echo 0 > /sys/class/leds/led1/brightness
 echo 0 > /sys/class/leds/led0/brightness
