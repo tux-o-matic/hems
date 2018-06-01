@@ -16,7 +16,28 @@ echo 0 > /sys/class/leds/led0/brightness
 
 ### Dependencies for HomeBridge
 ```shell
-sudo apt-get install npm nodejs-legacy ffmpeg libavahi-compat-libdnssd-dev
+sudo apt-get install git npm nodejs-legacy ffmpeg libavahi-compat-libdnssd-dev
+```
+
+### HomeBridge camera install
+```shell
+sudo mkdir /opt/homebridge-camera-rpi
+sudo chown pi /opt/homebridge-camera-rpi
+cd /opt
+git clone https://github.com/moritzmhmk/homebridge-camera-rpi
+cd homebridge-camera-rpi
+npm install
+```
+
+### HomeBridge camera config
+In /etc/homebridge-camera-rpi.conf.json
+```json
+{
+  "name": "Camera",
+  "id": "Camera",
+  "pincode": "021-23-456",
+  "username": "EC:23:3D:D3:52:D2"
+}
 ```
 
 ### Systemd service
