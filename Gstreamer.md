@@ -9,3 +9,14 @@ This utility requires the *v4l-utils* package.
 ```shell
 gst-launch-1.0 v4l2src device=/dev/video0 ! "video/x-raw,format=YUY2,width=640,height=480,type=video,framerate=(fraction)30/1" ! videoscale ! videoconvert ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! "video/x-h264,profile=main" ! rtph264pay ! udpsink host=127.0.0.1 port=5000
 ```
+
+Then to consume it, write in a text file ending in *.sdp*:
+
+```shell
+c=IN IP4 127.0.0.1
+m=video 5000 RTP/AVP 96
+a=rtpmap:96 H264/90000
+```
+This sdp file can be then used by VideoCapture() in OpenCV or any video client such as VLC.
+
+OpenCV using ffmpeg will complain about missing key frame if the video stream is started before the OpenCV program.
