@@ -18,13 +18,12 @@ def scan(args):
     print("[INFO] starting video stream...")
     cap = cv2.VideoCapture(os.path.join(args["working_dir"], 'stream.sdp'))
 
-    fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(os.path.join(args["working_dir"], 'stream.avi'), fourcc, 30, (640, 480))
 
     while(cap.isOpened()):
       ret, frame = cap.read()
       (h, w) = frame.shape[:2]
-
-      out = cv2.VideoWriter(os.path.join(args["working_dir"], 'stream.avi'), fourcc, 30.0, (w,h))
 
       blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
       net.setInput(blob)
@@ -47,7 +46,7 @@ def scan(args):
             cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
       #Local test
-      cv2.imshow("Frame", frame)
+      #cv2.imshow("Frame", frame)
       #Write to file
       out.write(frame)
 
