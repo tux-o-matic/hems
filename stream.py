@@ -22,8 +22,8 @@ def scan(args):
 
     captureTime = time.time()
 
-    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=640, height=480, framerate=10/1 ! queue ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + args['output_port']
-    out = cv2.VideoWriter(out_stream, cv2.CAP_GSTREAMER, 0, 10, (640,480), True)
+    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + args['width'] + ', height=' + args['height'] + ', framerate=10/1 ! queue ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + args['output_port']
+    out = cv2.VideoWriter(out_stream, cv2.CAP_GSTREAMER, 0, 10, (args['width'], args['height']), True)
     if not out.isOpened():
         print("Output writer isn't opened")
 
@@ -79,7 +79,9 @@ if __name__ == "__main__":
     ap.add_argument("-o", "--output_port", type=int, default=5001, help="UDP port of the generated RTP stream")
     ap.add_argument("-s", "--src_ip", default="127.0.0.1," help="IP address of the source RTP stream")
     ap.add_argument("-u", "--src_port", type=int, default=5000, help="UDP port of the source RTP stream")
-    ap.add_argument("-w", "--working_dir", required=True, help="Directory where stream.sdp and output is written to")
+    ap.add_argument("-d", "--working_dir", required=True, help="Directory where stream.sdp and output is written to")
+    ap.add_argument("-w", "--width", type=int, default=1280, help="Pixel width of the video stream")
+    ap.add_argument("-h", "--height", type=int, default=720, help="Pixel height of the video stream")
     args = vars(ap.parse_args())
 
     scan(args)
