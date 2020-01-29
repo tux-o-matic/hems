@@ -1,0 +1,12 @@
+---
+- name: Setup minions
+  hosts: minions
+  vars:
+    packages:
+      - libgstreamer1.0-0
+      - libgstreamer-plugins-base1.0-0
+      - gstreamer1.0-omx
+      - gstreamer1.0-omx-rpi
+      - gstreamer1.0-tools
+      - gstreamer1.0-plugins-base 
+  tasks:
