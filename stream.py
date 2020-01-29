@@ -4,7 +4,6 @@ import cv2
 import os
 import time
 
-os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "protocol_whitelist;file,rtp,udp"
 
 def scan(args):
     CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -17,7 +16,6 @@ def scan(args):
     net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
     print("[INFO] starting video stream...")
-    #cap = cv2.VideoCapture(os.path.join(args["working_dir"], 'stream.sdp'))
     cap = cv2.VideoCapture('udpsrc address=' + args['src_ip'] + ' port=' + args['src_port'] + ' caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
 
     captureTime = time.time()
