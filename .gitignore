@@ -11,6 +11,9 @@ models/
 .idea
 .idea/
 
+# OS FS folder
+.DS_Store
+
 # Distribution / packaging
 .Python
 env/
