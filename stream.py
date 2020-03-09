@@ -20,7 +20,7 @@ def scan(args):
 
     captureTime = time.time()
 
-    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=10/1 ! queue ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'])
+    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=10/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'])
     out = cv2.VideoWriter(out_stream, cv2.CAP_GSTREAMER, 0, 10, (args['width'], args['height']), True)
     if not out.isOpened():
         print("Output writer isn't opened")
@@ -70,6 +70,7 @@ def scan(args):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+    ap.add_argument("-e", "--encoder", default="x264enc", help="Gstreamer h264 encoder to use ('omxh264enc') on Pi")
     ap.add_argument("-p", "--prototxt", required=True, help="path to Caffe 'deploy' prototxt file")
     ap.add_argument("-m", "--model", required=True, help="path to Caffe pre-trained model")
     ap.add_argument("-c", "--confidence", type=float, default=0.2, help="minimum probability to filter weak detections")
