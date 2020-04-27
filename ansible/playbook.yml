@@ -24,6 +24,9 @@
     cam_multicast_ip: '224.1.1.1'
     cam_multicast_port: '5000'
     gstlaunch_bin: '/usr/bin/gst-launch-1.0'
+  tags:
+    - never
+    - minions
   tasks:
     - name: Create systemd service Unit
       template:
@@ -32,12 +35,12 @@
         owner: root
         group: root
         mode: '0644'
-   - name: Start RTP multicast stream
-     systemd:
-       name: 'cam-multicast-stream'
-       daemon_reload: yes
-       enabled: yes
-       state: started
+    - name: Start RTP multicast stream
+      systemd:
+        name: 'cam-multicast-stream'
+        daemon_reload: yes
+        enabled: yes
+        state: started
 
 - name: Configure brain
   hosts: brain
@@ -46,8 +49,15 @@
     opencv_ver: '4.3.0'
     stream_args: ''
     working_dir: '/opt/hems'
+  tags:
+    - never
+    - brain
   tasks:
     - name: Create directory
+      file:
+        path: "{{ working_dir}}"
+        state: directory
+        mode: '0755'
     - name: Install Python environment
       package:
         name:
@@ -87,8 +97,9 @@
         dest: "{{ working_dir}}/opencv.zip"
 
     - name: Download OpenCV contrib
-      get_url: "https://github.com/opencv/opencv_contrib/archive/{{ opencv_ver }}.zip"
-      dest: "{{ working_dir}}/opencv_contrib.zip"
+      get_url:
+        url: "https://github.com/opencv/opencv_contrib/archive/{{ opencv_ver }}.zip"
+        dest: "{{ working_dir}}/opencv_contrib.zip"
 
     - name: Unzip OpenCV source
       shell:
@@ -103,8 +114,9 @@
         creates: "{{ working_dir}}/opencv_contrib-{{ opencv_ver }}"
 
     - name: Create Python virtual env
-      command: "virtualenv3 {{ working_dir }}/venv"
-      creates: "{{ working_dir}}/venv"
+      shell:
+        cmd: "virtualenv3 {{ working_dir }}/venv"
+        creates: "{{ working_dir}}/venv"
 
     - name: Get PIP requirements
       get_url:
@@ -148,9 +160,9 @@
         owner: root
         group: root
         mode: '0644'
-   - name: Start RTP multicast stream
-     systemd:
-       name: 'stream'
-       daemon_reload: yes
-       enabled: yes
-       state: started
+    - name: Start RTP multicast stream
+      systemd:
+        name: 'stream'
+        daemon_reload: yes
+        enabled: yes
+        state: started
