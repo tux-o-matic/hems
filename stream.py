@@ -3,6 +3,8 @@ import argparse
 import cv2
 import os
 import time
+from classes.input import Input
+from classes.output import Output
 
 
 def scan(args):
@@ -16,20 +18,20 @@ def scan(args):
     net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
     print("[INFO] starting video stream...")
-    cap = cv2.VideoCapture('udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink'
+    input = Input(input_src)
 
     captureTime = time.time()
 
     out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=10/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'])
-    out = cv2.VideoWriter(out_stream, cv2.CAP_GSTREAMER, 0, 10, (args['width'], args['height']), True)
-    if not out.isOpened():
-        print("Output writer isn't opened")
 
-    while(cap.isOpened()):
-      ret, frame = cap.read()
+    output = Output(out_stream, args['width'], args['height'])
+    output.stream()
+
+
+    while(input.size() > 0):
+      frame = input.read()
       (h, w) = frame.shape[:2]
-
-      now = int(round(time.time() * 1000))
 
       if (int(now - captureTime)) >= 100:
           blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
@@ -49,14 +51,7 @@ def scan(args):
                 y = startY - 15 if startY - 15 > 15 else startY + 15
                 cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
-
-          #Local test
-          #cv2.imshow("Frame", frame)
-          for i in range(3):
-            out.write(frame) #Duplicate frames,30 fps video
-            #print("Wrote frame to output stream")
-          captureTime = int(round(time.time() * 1000))
-
+          output.update(frame)
 
 
       # if the `q` key was pressed, break from the loop
@@ -64,9 +59,6 @@ def scan(args):
       if key == ord("q"):
         break
 
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ansible
+ansible/inventory
+
 # Models
 .models
 models/
