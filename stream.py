@@ -25,7 +25,7 @@ def scan(args):
 
     out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=10/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'])
 
-    output = Output(out_stream, args['width'], args['height'])
+    output = Output(out_stream, args['height'], args['width'])
     output.stream()
 
 

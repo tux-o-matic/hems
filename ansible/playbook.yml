@@ -1,22 +1,23 @@
 ---
 - name: Common setup
   hosts: all
-  vars:
-    av_packages:
-      - libgstreamer1.0-0
-      - libgstreamer-plugins-base1.0-0
-      - gstreamer1.0-omx
-      - gstreamer1.0-omx-rpi
-      - gstreamer1.0-tools
-      - gstreamer1.0-plugins-base
-      - gstreamer1.0-plugins-good
-      - gstreamer1.0-plugins-ugly
-      - x264
+  tags:
+    - never
+    - minions
+    - brain
   tasks:
     - name: Install Video Dependencies
       package:
-        name: item
-      with_items: "{{ av_packages }}"
+        name:
+          - libgstreamer1.0-0
+          - libgstreamer-plugins-base1.0-0
+          - gstreamer1.0-omx
+          - gstreamer1.0-omx-rpi
+          - gstreamer1.0-tools
+          - gstreamer1.0-plugins-base
+          - gstreamer1.0-plugins-good
+          - gstreamer1.0-plugins-ugly
+          - x264
 
 - name: Configure minions
   hosts: minions
@@ -69,14 +70,13 @@
           - python3
           - python3-dev
           - python3-pip
-          - python3-virtualenv
+          - python3-venv
         state: latest
     - name: Install CV Dependencies
       package:
         name:
           - libgstreamer1.0-dev
           - libgstreamer-plugins-base1.0-dev
-          - gstreamer1.0*
           - libjpeg-dev
           - libtiff5-dev
           - libjasper-dev
@@ -91,7 +91,7 @@
           - libxvidcore-dev
           - libx264-dev
 
-    - name: Download OpenCV soure
+    - name: Download OpenCV source
       get_url:
         url: "https://github.com/opencv/opencv/archive/{{ opencv_ver }}.zip"
         dest: "{{ working_dir}}/opencv.zip"
@@ -115,18 +115,19 @@
 
     - name: Create Python virtual env
       shell:
-        cmd: "virtualenv3 {{ working_dir }}/venv"
+        cmd: "python3 -m venv {{ working_dir }}/venv"
         creates: "{{ working_dir}}/venv"
 
-    - name: Get PIP requirements
-      get_url:
-        url: https://github.com/tux-o-matic/hems/blob/master/requirements.txt
-        dest: "{{ working_dir }}/requirements.txt"
+    #- name: Get PIP requirements
+    #  get_url:
+    #    url: 'https://raw.githubusercontent.com/tux-o-matic/hems/master/requirements.txt'
+    #    dest: "{{ working_dir }}/requirements.txt"
 
-    - name: Install Python libraries
-      pip:
-        requirements: "{{ working_dir }}/requirements.txt"
-        virtualenv_python: python3
+    #- name: Install Python libraries
+    #  pip:
+    #    requirements: "{{ working_dir }}/requirements.txt"
+    #    executable: "{{ working_dir }}/venv/bin/pip3"
+    #    virtualenv_python: python3
 
     - name: Create OpenCV build dir
       file:
@@ -137,17 +138,22 @@
     - name: Configure Make for OpenCV
       shell:
         cmd: "source {{ working_dir}}/venv/bin/activate && cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH={{ working_dir}}/opencv_contrib-{{ opencv_ver }}/modules -D ENABLE_NEON=ON -D ENABLE_VFPV3=ON -D BUILD_TESTS=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D OPENCV_ENABLE_NONFREE=ON -D CMAKE_SHARED_LINKER_FLAGS=-latomic -D BUILD_EXAMPLES=OFF -D WITH_GSTREAMER=ON .."
+        executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
 
     - name: Make OpenCV
       shell:
         cmd: "source {{ working_dir}}/venv/bin/activate && make -j4"
+        executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
+        creates: "{{ working_dir}}/opencv-{{ opencv_ver }}/bin/opencv_perf_dnn"
 
     - name: Install  OpenCV
       shell:
         cmd: "source {{ working_dir}}/venv/bin/activate && make install && ldconfig"
+        executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
+        creates: "/usr/local/bin/opencv_version"
 
     - name: Get Python code
       get_url:
