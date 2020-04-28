@@ -14,6 +14,7 @@ class Output:
             print("Output writer isn't opened")
 
         self.stopped = False
+        self.stream_started = False
         self.Q = Queue(maxsize=queueSize)
 
     def start(self):
@@ -23,6 +24,7 @@ class Output:
         return self
 
     def stream(self):
+        self.stream_started = True
         while True:
             if self.Q.qsize() == 0:
                 blank_image = np.zeros(shape=[self.width, self.height, 3], dtype=np.uint8)
@@ -34,6 +36,8 @@ class Output:
 
     def update(self, frame):
         self.Q.put(frame)
+        if not self.stream_started:
+            self.stream()
 
 
     def size(self):
