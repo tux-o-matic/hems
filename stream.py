@@ -23,7 +23,7 @@ def scan(args):
 
     captureTime = time.time()
 
-    out_stream = 'appsrc ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=30/1 ! queue ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
+    out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
 
     output = Output(out_stream, args['height'], args['width']).start()
 
@@ -49,7 +49,7 @@ def scan(args):
             y = startY - 15 if startY - 15 > 15 else startY + 15
             cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
-      if frame not None:
+      if frame is not None:
           print("Frame Width:" + str(frame.shape[1]) + ", height:" + str(frame.shape[0]))
           output.update(frame)
 
