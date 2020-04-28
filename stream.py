@@ -18,7 +18,7 @@ def scan(args):
     net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
     print("[INFO] starting video stream...")
-    input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink'
+    input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
     input = Input(input_src).start()
 
     captureTime = time.time()
