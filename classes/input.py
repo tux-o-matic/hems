@@ -7,7 +7,6 @@ import cv2
 class Input:
     def __init__(self, src, queueSize=300):
         self.cap = cv2.VideoCapture(src, cv2.CAP_GSTREAMER)
-        self.stopped = False
         self.Q = Queue(maxsize=queueSize)
 
     def start(self):
@@ -18,17 +17,15 @@ class Input:
 
     def update(self):
         while True:
-            if self.stopped:
+            (grabbed, frame) = self.cap.read()
+            if not grabbed: # For live stream should feed blank frame
+                print("Stopped input capture")
+                self.stop()
                 return
-
-            if not self.Q.full():
-                (grabbed, frame) = self.cap.read()
-                if not grabbed: # For live stream should feed blank frame
-                    self.stop()
-                    return
-
-                self.Q.put(frame)
-
+            if self.Q.full():
+                self.Q.popleft()
+                print("Dropped oldest frame from input queue")
+            self.Q.put(frame)
 
     def read(self):
         return self.Q.get()
@@ -40,4 +37,3 @@ class Input:
 
     def stop(self):
         self.cap.release()
-        self.stopped = True

@@ -49,9 +49,8 @@ def scan(args):
             y = startY - 15 if startY - 15 > 15 else startY + 15
             cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
-      if frame is not None:
-          print("Frame Width:" + str(frame.shape[1]) + ", height:" + str(frame.shape[0]))
-          output.update(frame)
+      output.update(frame)
+
 
 
       # if the `q` key was pressed, break from the loop
