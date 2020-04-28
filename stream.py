@@ -24,14 +24,21 @@ def scan(args):
     out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
     output = Output(out_stream, args['height'], args['width']).start()
 
+    last_detected = None
+    last_decteted_use_count = 0
 
     while(input.size() > 0):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
-      blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
-      net.setInput(blob)
-      detections = net.forward()
+      if last_detected is None or last_decteted_use_count > 3:
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
+        net.setInput(blob)
+        detections = net.forward()
+        last_detected = detections
+        last_decteted_use_count += 1
+      else:
+        detections = last_detected
 
       for i in np.arange(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
