@@ -27,7 +27,7 @@ def scan(args):
     last_detected = None
     last_decteted_use_count = 0
 
-    while(input.size() > 0):
+    while(True):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
@@ -36,9 +36,10 @@ def scan(args):
         net.setInput(blob)
         detections = net.forward()
         last_detected = detections
-        last_decteted_use_count += 1
+        last_decteted_use_count = 0
       else:
         detections = last_detected
+        last_decteted_use_count += 1
 
       for i in np.arange(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
