@@ -23,7 +23,7 @@ class Input:
                 self.stop()
                 return
             if self.Q.full():
-                self.Q.popleft()
+                discarded_frame = self.Q.get()
                 print("Dropped oldest frame from input queue")
             self.Q.put(frame)
 
