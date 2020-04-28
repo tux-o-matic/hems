@@ -13,7 +13,6 @@ class Output:
         if not self.out.isOpened():
             print("Output writer isn't opened")
 
-        self.stopped = False
         self.last_frame = None
         self.Q = Queue(maxsize=queueSize)
 
@@ -24,7 +23,6 @@ class Output:
         return self
 
     def stream(self):
-        self.stream_started = True
         while True:
             if self.Q.qsize() < 1 and self.last_frame is None:
                 blank_image = np.zeros(shape=[self.height, self.width, 3], dtype=np.uint8)
@@ -35,6 +33,9 @@ class Output:
 
 
     def update(self, frame):
+        if self.Q.full():
+            self.Q.popleft()
+            print("Dropped oldest frame from output queue")
         self.Q.put(frame)
 
 
@@ -44,4 +45,3 @@ class Output:
 
     def stop(self):
         self.out.release()
-        self.stopped = True
