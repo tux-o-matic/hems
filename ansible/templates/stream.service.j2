@@ -4,7 +4,7 @@ Description=Object detection in RTP stream
 [Service]
 Environment="PATH={{ working_dir }}/venv/bin:$PATH"
 STREAM_ARGS= "{{ stream_args }}"
-ExecStart="{{ working_dir }}/venv/bin/python {{ working_dir }}/stream.py $STREAM_ARGS --serve-in-foreground"
+ExecStart="python3.7 {{ working_dir }}/stream.py $STREAM_ARGS --serve-in-foreground"
 Restart=always
 RestartSec=10
 User=pi

@@ -48,7 +48,7 @@
   vars:
     ansible_command_timeout: 3600
     opencv_ver: '4.3.0'
-    stream_args: ''
+    stream_args: '-p /opt/hems/deploy.prototxt -m /opt/hems/mobilenet.caffemodel -i 224.1.1.1 -o 5000'
     working_dir: '/opt/hems'
   tags:
     - never
@@ -69,6 +69,7 @@
           - pkg-config
           - python3
           - python3-dev
+          - python3-numpy
           - python3-pip
           - python3-venv
         state: latest
@@ -137,28 +138,46 @@
 
     - name: Configure Make for OpenCV
       shell:
-        cmd: "source {{ working_dir}}/venv/bin/activate && cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH={{ working_dir}}/opencv_contrib-{{ opencv_ver }}/modules -D ENABLE_NEON=ON -D ENABLE_VFPV3=ON -D BUILD_TESTS=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D OPENCV_ENABLE_NONFREE=ON -D CMAKE_SHARED_LINKER_FLAGS=-latomic -D BUILD_EXAMPLES=OFF -D WITH_GSTREAMER=ON .."
+        cmd: "cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH={{ working_dir}}/opencv_contrib-{{ opencv_ver }}/modules -D ENABLE_NEON=ON -D ENABLE_VFPV3=ON -D BUILD_TESTS=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D OPENCV_ENABLE_NONFREE=ON -D CMAKE_SHARED_LINKER_FLAGS=-latomic -D BUILD_EXAMPLES=OFF -D WITH_GSTREAMER=ON -D PYTHON3_EXECUTABLE=/usr/bin/python3 .."
         executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
+        creates: "{{ working_dir}}/opencv-{{ opencv_ver }}/build/CMakeCache.txt"
 
     - name: Make OpenCV
       shell:
-        cmd: "source {{ working_dir}}/venv/bin/activate && make -j4"
+        cmd: "make -j4"
         executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
-        creates: "{{ working_dir}}/opencv-{{ opencv_ver }}/bin/opencv_perf_dnn"
+        creates: "{{ working_dir}}/opencv-{{ opencv_ver }}/build/bin/opencv_perf_dnn"
 
     - name: Install  OpenCV
       shell:
-        cmd: "source {{ working_dir}}/venv/bin/activate && make install && ldconfig"
+        cmd: "make install && ldconfig"
         executable: '/bin/bash'
         chdir: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
         creates: "/usr/local/bin/opencv_version"
+
+    - name: Create cv2.so lib file
+      copy:
+        src: '/usr/local/lib/python3.7/dist-packages/cv2/python-3.7/cv2.cpython-37m-arm-linux-gnueabihf.so'
+        dest: '/usr/local/lib/python3.7/dist-packages/cv2/python-3.7/cv2.so'
+        remote_src: yes
+
+    - name: Create CV2 sym link
+
 
     - name: Get Python code
       get_url:
         url: https://raw.githubusercontent.com/tux-o-matic/hems/master/stream.py
         dest: "{{ working_dir }}/stream.py"
+    - name: Download prototxt
+      get_url:
+        url: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/deploy.prototxt
+        dest: "{{ working_dir }}/deploy.prototxt"
+    - name: Download model
+      get_url:
+        url: https://github.com/chuanqi305/MobileNet-SSD/raw/master/mobilenet_iter_73000.caffemodel
+        dest: "{{ working_dir }}/mobilenet.caffemodel"
     - name: Create systemd service Unit
       template:
         src: 'templates/stream.service.j2'

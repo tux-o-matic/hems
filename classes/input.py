@@ -11,33 +11,33 @@ class Input:
         self.Q = Queue(maxsize=queueSize)
 
     def start(self):
-		t = Thread(target=self.update, args=())
-		t.daemon = True
-		t.start()
-		return self
+        t = Thread(target=self.update, args=())
+        t.daemon = True
+        t.start()
+        return self
 
     def update(self):
-		while True:
-			if self.stopped:
-				return
+        while True:
+            if self.stopped:
+                return
 
-			if not self.Q.full():
-				(grabbed, frame) = self.stream.read()
-				if not grabbed: # For live stream should feed blank frame
-					self.stop()
-					return
+            if not self.Q.full():
+                (grabbed, frame) = self.stream.read()
+                if not grabbed: # For live stream should feed blank frame
+                    self.stop()
+                    return
 
-				self.Q.put(frame)
+                self.Q.put(frame)
 
 
     def read(self):
-		return self.Q.get()
+        return self.Q.get()
 
 
     def size(self):
-		return self.Q.qsize()
+        return self.Q.qsize()
 
 
     def stop(self):
         self.cap.release()
-		self.stopped = True
+        self.stopped = True

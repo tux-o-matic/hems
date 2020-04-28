@@ -17,10 +17,10 @@ class Output:
         self.Q = Queue(maxsize=queueSize)
 
     def start(self):
-		t = Thread(target=self.update, args=())
-		t.daemon = True
-		t.start()
-		return self
+        t = Thread(target=self.update, args=())
+        t.daemon = True
+        t.start()
+        return self
 
     def stream(self):
         while True:
@@ -28,9 +28,8 @@ class Output:
                 blank_image = np.zeros(shape=[elf.width, elf.height, 3], dtype=np.uint8)
                 self.out.write(blank_image)
             else:
-                frame =  self.Q.get()
-                for i in range(15):
-                    self.out.write(frame)
+                self.last_frame = self.Q.get()
+                self.out.write(self.last_frame)
 
 
     def update(self, frame):
@@ -38,9 +37,9 @@ class Output:
 
 
     def size(self):
-		return self.Q.qsize()
+        return self.Q.qsize()
 
 
     def stop(self):
         self.out.release()
-		self.stopped = True
+        self.stopped = True
