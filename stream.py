@@ -50,7 +50,7 @@ def scan(args):
             cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
       if frame not None:
-          print("Frame Width:" + frame.size().width + ", height:" + frame.size().height)
+          print("Frame Width:" + str(frame.shape[1]) + ", height:" + str(frame.shape[0]))
           output.update(frame)
 
 

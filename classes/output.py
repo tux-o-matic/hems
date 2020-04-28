@@ -26,8 +26,8 @@ class Output:
     def stream(self):
         self.stream_started = True
         while True:
-            if self.Q.qsize() == 0:
-                blank_image = np.zeros(shape=[self.width, self.height, 3], dtype=np.uint8)
+            if self.Q.qsize() < 1:
+                blank_image = np.zeros(shape=[self.height, self.width, 3], dtype=np.uint8)
                 self.out.write(blank_image)
             else:
                 self.last_frame = self.Q.get()
