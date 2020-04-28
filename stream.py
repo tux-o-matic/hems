@@ -23,7 +23,7 @@ def scan(args):
 
     captureTime = time.time()
 
-    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=30/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'] + ' auto-multicast=true')
+    out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=30/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
 
     output = Output(out_stream, args['height'], args['width']).start()
     output.stream()
