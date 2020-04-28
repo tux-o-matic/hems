@@ -6,7 +6,7 @@ import numpy as np
 
 
 class Output:
-    def __init(self, stream, height, width, queueSize=300):
+    def __init__(self, stream, height, width, queueSize=300):
         self.out = cv2.VideoWriter(stream, cv2.CAP_GSTREAMER, 0, 10, (width, height), True)
         self.width = width
         self.height = height
@@ -25,7 +25,7 @@ class Output:
     def stream(self):
         while True:
             if self.Q.qsize() == 0:
-                blank_image = np.zeros(shape=[elf.width, elf.height, 3], dtype=np.uint8)
+                blank_image = np.zeros(shape=[self.width, self.height, 3], dtype=np.uint8)
                 self.out.write(blank_image)
             else:
                 self.last_frame = self.Q.get()

@@ -5,7 +5,7 @@ import cv2
 
 
 class Input:
-    def __init(self, src, queueSize=300):
+    def __init__(self, src, queueSize=300):
         self.cap = cv2.VideoCapture(src, cv2.CAP_GSTREAMER)
         self.stopped = False
         self.Q = Queue(maxsize=queueSize)
@@ -22,7 +22,7 @@ class Input:
                 return
 
             if not self.Q.full():
-                (grabbed, frame) = self.stream.read()
+                (grabbed, frame) = self.cap.read()
                 if not grabbed: # For live stream should feed blank frame
                     self.stop()
                     return

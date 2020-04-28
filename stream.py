@@ -19,13 +19,13 @@ def scan(args):
 
     print("[INFO] starting video stream...")
     input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink'
-    input = Input(input_src)
+    input = Input(input_src).start()
 
     captureTime = time.time()
 
     out_stream = 'appsrc ! queue ! videoconvert ! video/x-raw, width=' + str(args['width']) + ', height=' + str(args['height']) + ', framerate=30/1 ! queue ! ' + str(args['encoder']) + ' tune=zerolatency bitrate=500 speed-preset=superfast ! queue ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port'] + ' auto-multicast=true')
 
-    output = Output(out_stream, args['height'], args['width'])
+    output = Output(out_stream, args['height'], args['width']).start()
     output.stream()
 
 
@@ -33,25 +33,24 @@ def scan(args):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
-      if (int(now - captureTime)) >= 100:
-          blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
-          net.setInput(blob)
-          detections = net.forward()
+      blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
+      net.setInput(blob)
+      detections = net.forward()
 
-          for i in np.arange(0, detections.shape[2]):
-            confidence = detections[0, 0, i, 2]
-            if confidence > args["confidence"]:
-                idx = int(detections[0, 0, i, 1])
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
+      for i in np.arange(0, detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+        if confidence > args["confidence"]:
+            idx = int(detections[0, 0, i, 1])
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
 
-                # draw the prediction on the frame
-                label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-                cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
-                y = startY - 15 if startY - 15 > 15 else startY + 15
-                cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+            # draw the prediction on the frame
+            label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+            cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
+            y = startY - 15 if startY - 15 > 15 else startY + 15
+            cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
-          output.update(frame)
+      output.update(frame)
 
 
       # if the `q` key was pressed, break from the loop
