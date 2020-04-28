@@ -21,10 +21,7 @@ def scan(args):
     input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
     input = Input(input_src).start()
 
-    captureTime = time.time()
-
     out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
-
     output = Output(out_stream, args['height'], args['width']).start()
 
 
@@ -51,12 +48,13 @@ def scan(args):
 
       output.update(frame)
 
-
-
       # if the `q` key was pressed, break from the loop
       key = cv2.waitKey(1) & 0xFF
       if key == ord("q"):
         break
+
+    input.stop()
+    output.stop()
 
 
 if __name__ == "__main__":
