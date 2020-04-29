@@ -32,7 +32,7 @@ def scan(args):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
-      if last_detected is None or last_decteted_use_count > 3:
+      if last_detected is None or last_decteted_use_count > 5:
         net.update(frame)
         detections = net.read()
         if detections is None:
