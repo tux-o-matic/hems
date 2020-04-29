@@ -6,7 +6,7 @@ import cv2
 
 
 class Net:
-    def __init__(self, model, prototxt, queueSize=50):
+    def __init__(self, prototxt, model, queueSize=50):
         self.neural_net = cv2.dnn.readNetFromCaffe(prototxt, model)
         self.latest_detection = None
         self.Q = Queue(maxsize=queueSize)
@@ -23,7 +23,7 @@ class Net:
             if self.Q.qsize() > 0:
                 blob = cv2.dnn.blobFromImage(cv2.resize(self.Q.get(), (300, 300)), 0.007843, (300, 300), 127.5)
                 self.neural_net.setInput(blob)
-                self.latest_detection = net.forward()
+                self.latest_detection = self.neural_net.forward()
 
 
     def update(self, frame):
