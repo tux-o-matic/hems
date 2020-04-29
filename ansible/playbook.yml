@@ -73,7 +73,6 @@
           - python3-dev
           - python3-numpy
           - python3-pip
-          - python3-venv
         state: latest
     - name: Install CV Dependencies
       package:
@@ -116,22 +115,6 @@
         chdir: "{{ working_dir}}"
         creates: "{{ working_dir}}/opencv_contrib-{{ opencv_ver }}"
 
-    - name: Create Python virtual env
-      shell:
-        cmd: "python3 -m venv {{ working_dir }}/venv"
-        creates: "{{ working_dir}}/venv"
-
-    #- name: Get PIP requirements
-    #  get_url:
-    #    url: 'https://raw.githubusercontent.com/tux-o-matic/hems/master/requirements.txt'
-    #    dest: "{{ working_dir }}/requirements.txt"
-
-    #- name: Install Python libraries
-    #  pip:
-    #    requirements: "{{ working_dir }}/requirements.txt"
-    #    executable: "{{ working_dir }}/venv/bin/pip3"
-    #    virtualenv_python: python3
-
     - name: Create OpenCV build dir
       file:
         path: "{{ working_dir}}/opencv-{{ opencv_ver }}/build"
@@ -164,9 +147,6 @@
         src: '/usr/local/lib/python3.7/dist-packages/cv2/python-3.7/cv2.cpython-37m-arm-linux-gnueabihf.so'
         dest: '/usr/local/lib/python3.7/dist-packages/cv2/python-3.7/cv2.so'
         remote_src: yes
-
-    - name: Create CV2 sym link
-
 
     - name: Get Python code
       get_url:
