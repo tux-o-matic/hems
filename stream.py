@@ -4,6 +4,7 @@ import cv2
 import os
 import time
 from classes.input import Input
+from classes.net import Net
 from classes.output import Output
 
 
@@ -15,7 +16,7 @@ def scan(args):
     COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
     print("[INFO] loading model...")
-    net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
+    net = Net(args["prototxt"], args["model"]).start()
 
     print("[INFO] starting video stream...")
     input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
@@ -32,9 +33,10 @@ def scan(args):
       (h, w) = frame.shape[:2]
 
       if last_detected is None or last_decteted_use_count > 3:
-        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
-        net.setInput(blob)
-        detections = net.forward()
+        net.update(frame)
+        detections = net.read()
+        if detections is None:
+            continue
         last_detected = detections
         last_decteted_use_count = 0
       else:
