@@ -34,7 +34,7 @@ class Output:
 
     def update(self, frame):
         if self.Q.full():
-            self.Q.popleft()
+            discarded_frame = self.Q.get()
             print("Dropped oldest frame from output queue")
         self.Q.put(frame)
 
