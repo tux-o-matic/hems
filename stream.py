@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import cv2
 import os
+import socket
 import time
 from classes.input import Input
 from classes.net import Net
@@ -22,7 +23,12 @@ def scan(args):
     input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, clock-rate=90000, encoding-name=H264, payload=96" ! rtpjitterbuffer ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
     input = Input(input_src).start()
 
-    out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
+
+    OUTPUT = os.getenv('OUTPUT_METHOD', 'HLS')
+    if OUTPUT == 'HLS':
+        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! mpegtsmux ! hlssink playlist-root=http://' + socket.getfqdn() + ':8080 location=/var/www/segment_%05d.ts target-duration=5 max-files=5'
+    elif OUTPUT == 'RTP':
+        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
     output = Output(out_stream, args['height'], args['width']).start()
 
     last_detected = None

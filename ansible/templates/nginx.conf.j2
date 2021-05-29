@@ -1,0 +1,32 @@
+worker_processes  auto;
+events {
+    worker_connections  1024;
+}
+
+http {
+    sendfile off;
+    tcp_nopush on;
+    aio on;
+    directio 512;
+    default_type application/octet-stream;
+
+    server {
+        listen 8080;
+
+        access_log off;
+
+        location / {
+            index index.html;
+            add_header 'Cache-Control' 'no-cache';
+
+            types {
+                application/dash+xml mpd;
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+
+            root /var/www/;
+        }
+
+    }
+}
