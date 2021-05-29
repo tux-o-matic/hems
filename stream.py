@@ -19,7 +19,7 @@ def scan(args):
     net = Net(args["prototxt"], args["model"]).start()
 
     print("[INFO] starting video stream...")
-    input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, clock-rate=90000, encoding-name=H264, payload=96" ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
+    input_src= 'udpsrc multicast-group=' + args['src_ip'] + ' port=' + str(args['src_port']) + ' auto-multicast=true caps = "application/x-rtp, clock-rate=90000, encoding-name=H264, payload=96" ! rtpjitterbuffer ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink'
     input = Input(input_src).start()
 
     out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'

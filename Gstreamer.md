@@ -7,7 +7,7 @@ v4l2-ctl --all
 This utility requires the *v4l-utils* package.
 
 ```shell
-gst-launch-1.0 v4l2src device=/dev/video0 ! "video/x-raw,format=YUY2,width=640,height=480,type=video,framerate=(fraction)30/1" ! videoscale ! videoconvert ! x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! "video/x-h264,profile=main" ! rtph264pay ! udpsink host=127.0.0.1 port=5000
+gst-launch-1.0 v4l2src device=/dev/video0 ! "video/x-raw,format=YUY2,width=640,height=480,type=video,framerate=(fraction)30/1" ! videoscale ! videoconvert ! x264enc tune=zerolatency bitrate=500 speed-preset=ultrafast ! "video/x-h264,profile=baseline" ! rtph264pay ! udpsink host=127.0.0.1 port=5000
 ```
 Multicast variant:
 ```shell
