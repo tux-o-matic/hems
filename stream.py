@@ -29,7 +29,7 @@ def scan(args):
     if OUTPUT == 'HLS':
         out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! mpegtsmux ! hlssink playlist-root=http://' + PLAYLIST_ROOT + ':8080 playlist-location="/var/www/playlist.m3u8" location=/var/www/segment_%05d.ts target-duration=5 max-files=5'
     elif OUTPUT == 'RTP':
-        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
+        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay config-interval=1 pt=96 ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
     output = Output(out_stream, args['height'], args['width']).start()
 
     last_detected = None
