@@ -46,9 +46,9 @@ def scan(args):
     OUTPUT = os.getenv('OUTPUT_METHOD', 'HLS')
     PLAYLIST_ROOT = os.getenv('PLAYLIST_ROOT', socket.getfqdn())
     if OUTPUT == 'HLS':
-        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! mpegtsmux ! hlssink playlist-root=http://' + PLAYLIST_ROOT + ':8080 playlist-location="/var/www/playlist.m3u8" location=/var/www/segment_%05d.ts target-duration=5 max-files=5'
+        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! mpegtsmux ! hlssink playlist-root=http://' + PLAYLIST_ROOT + ':8080 playlist-location="/var/www/playlist.m3u8" location=/var/www/segment_%05d.ts target-duration=5 max-files=20'
     elif OUTPUT == 'RTP':
-        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay config-interval=1 pt=96 ! queue ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
+        out_stream = 'appsrc ! videoconvert ! ' + str(args['encoder']) + ' ! rtph264pay config-interval=1 pt=96 ! udpsink host=' + args['output_ip'] + ' port=' + str(args['output_port']) + ' auto-multicast=true'
     output = Output(out_stream, args['height'], args['width']).start()
 
     last_detected = None
@@ -58,7 +58,7 @@ def scan(args):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
-      if not last_detected or last_decteted_use_count > 5:
+      if not last_detected or last_decteted_use_count > 2:
         net.update(frame)
         detections = net.read()
         if not detections:
