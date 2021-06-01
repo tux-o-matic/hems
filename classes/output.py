@@ -7,7 +7,7 @@ import numpy as np
 
 class Output:
     def __init__(self, stream, height, width, queueSize=300):
-        self.out = cv2.VideoWriter(stream, cv2.CAP_GSTREAMER, 0, 10, (width, height), True)
+        self.out = cv2.VideoWriter(stream, cv2.CAP_GSTREAMER, 0, 15, (width, height), True)
         self.width = width
         self.height = height
         if not self.out.isOpened():
