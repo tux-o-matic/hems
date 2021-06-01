@@ -15,3 +15,6 @@ ffmpeg -i /dev/video0 -vcodec h264_omx -pix_fmt yuv420p -f rawvideo -vf scale=12
 ```
 ### Credits
 pyimagesearch.com for OpenCV examples
+
+Coral EdgeTPU TFLite usage:
+https://gist.github.com/Namburger/f7e6c18af94ef3d6a70076a130eb1f7c
