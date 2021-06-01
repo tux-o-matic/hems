@@ -9,11 +9,30 @@ from classes.net import Net
 from classes.output import Output
 
 
+def load_label(path, encoding='utf-8'):
+    with open(path, 'r', encoding=encoding) as f:
+        lines = f.readlines()
+        if not lines:
+            return {}
+        if lines[0].split(' ', maxsplit=1)[0].isdigit():
+            pairs = [line.split(' ', maxsplit=1) for line in lines]
+            return {int(index): label.strip() for index, label in pairs}
+        else:
+            return {index: line.strip() for index, line in enumerate(lines)}
+
+
 def scan(args):
     CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
     "sofa", "train", "tvmonitor"]
+
+    LABELS = os.getenv("LABELS", "LOCAL")
+    if LABELS == 'LOCAL':
+        pass
+    else:
+        CLASSES = load_label(LABELS)
+
     COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
     print("[INFO] loading model...")
@@ -50,18 +69,31 @@ def scan(args):
         detections = last_detected
         last_decteted_use_count += 1
 
-      for i in np.arange(0, detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > args["confidence"]:
-            idx = int(detections[0, 0, i, 1])
-            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-            (startX, startY, endX, endY) = box.astype("int")
+      boxes = detections[0]
+      classes = detections[1]
+      scores = detections[2]
 
-            # draw the prediction on the frame
-            label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-            cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
-            y = startY - 15 if startY - 15 > 15 else startY + 15
-            cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+      for i in range(len(scores)):
+            if ((scores[i] > args.threshold) and (scores[i] <= 1.0)):
+                # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
+                ymin = int(max(1, (boxes[i][0] * h)))
+                xmin = int(max(1, (boxes[i][1] * w)))
+                ymax = int(min(image_height, (boxes[i][2] * h)))
+                xmax = int(min(image_width, (boxes[i][3] * w)))
+
+                cv2.rectangle(frame, (xmin, ymin),
+                              (xmax, ymax), (10, 255, 0), 4)
+
+                object_name = labels[int(classes[i])]
+                label = '%s: %d%%' % (object_name, int(scores[i]*100))
+                labelSize, baseLine = cv2.getTextSize(
+                    label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+                # Make sure not to draw label too close to top of window
+                label_ymin = max(ymin, labelSize[1] + 10)
+                cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (
+                    xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED)
+                cv2.putText(frame, label, (xmin, label_ymin-7),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
       output.update(frame)
 
