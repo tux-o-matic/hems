@@ -151,16 +151,18 @@
 
     - name: Get Python code
       get_url:
-        url: https://raw.githubusercontent.com/tux-o-matic/hems/master/stream.py
+        url: https://raw.githubusercontent.com/tux-o-matic/hems/coral/stream.py
         dest: "{{ working_dir }}/stream.py"
+
+
     - name: Download prototxt
       get_url:
-        url: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/deploy.prototxt
-        dest: "{{ working_dir }}/deploy.prototxt"
+        url: https://raw.githubusercontent.com/google-coral/edgetpu/master/test_data/coco_labels.txt
+        dest: "{{ working_dir }}/coco_labels.txt"
     - name: Download model
       get_url:
-        url: https://github.com/chuanqi305/MobileNet-SSD/raw/master/mobilenet_iter_73000.caffemodel
-        dest: "{{ working_dir }}/mobilenet.caffemodel"
+        url: https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite
+        dest: "{{ working_dir }}/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
     - name: Configure Nginx
       template:
         src: 'templates/nginx.conf.j2'

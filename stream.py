@@ -58,10 +58,10 @@ def scan(args):
       frame = input.read()
       (h, w) = frame.shape[:2]
 
-      if last_detected is None or last_decteted_use_count > 5:
+      if not last_detected or last_decteted_use_count > 5:
         net.update(frame)
         detections = net.read()
-        if detections is None:
+        if not detections:
             continue
         last_detected = detections
         last_decteted_use_count = 0
@@ -74,17 +74,17 @@ def scan(args):
       scores = detections[2]
 
       for i in range(len(scores)):
-            if ((scores[i] > args.threshold) and (scores[i] <= 1.0)):
+            if ((scores[i] > args["confidence"]) and (scores[i] <= 1.0)):
                 # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
                 ymin = int(max(1, (boxes[i][0] * h)))
                 xmin = int(max(1, (boxes[i][1] * w)))
-                ymax = int(min(image_height, (boxes[i][2] * h)))
-                xmax = int(min(image_width, (boxes[i][3] * w)))
+                ymax = int(min(h, (boxes[i][2] * h)))
+                xmax = int(min(w, (boxes[i][3] * w)))
 
                 cv2.rectangle(frame, (xmin, ymin),
                               (xmax, ymax), (10, 255, 0), 4)
 
-                object_name = labels[int(classes[i])]
+                object_name = CLASSES[int(classes[i])]
                 label = '%s: %d%%' % (object_name, int(scores[i]*100))
                 labelSize, baseLine = cv2.getTextSize(
                     label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
